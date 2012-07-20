@@ -36,6 +36,9 @@ h1 {
 input {
     font-size: 120%;
 }
+tr {
+    vertical-align: top;
+}
 </style>
 </head>
 <body>
@@ -48,6 +51,11 @@ input {
     ボックスの文字を変えるとマークを変えることができます
     <div id="form">
       <table>
+        <tr>
+          <th>有効</th>
+          <th>表示内容</th>
+          <th>マーク</th>
+        </tr>
         <tr>
           <td><input type="checkbox" id="both" name='both' value='true' /></td>
           <td>両想い</td>
@@ -67,6 +75,11 @@ input {
           <td><input type="checkbox" id="me" name='me' value='true'/></td>
           <td>自分</td>
           <td><input type="text" id="me_str" value="" size="5"></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" id="fav" name='fav' value='true'/></td>
+          <td><textarea id='fav_list' placeholder="改行区切りでユーザーIDを入力"></textarea></td>
+          <td><input type="text" id="fav_str" value="" size="5"></td>
         </tr>
         <tr>
           <td colspan=2>

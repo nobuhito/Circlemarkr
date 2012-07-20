@@ -1,5 +1,6 @@
 var circles = [];
 var followers = [];
+var favs = [];
 var userid = 0;
 var show = [];
 
@@ -10,13 +11,18 @@ chrome.extension.sendRequest({
         'love' : 'true',
         'orz'  : 'true',
         'me'   : 'true',
+        'fav'  : 'true',
         'both_str': '♥',
-        'love_str': '◀',
-        'orz_str': '▶',
-        'me_str': '★'
+        'love_str': '▶',
+        'orz_str': '◀',
+        'me_str': '★',
+        'fav_str': '●',
+        'fav_list': ''
     }]
 }, function(response) {
     show = response.values;
+
+    favs = show['fav_list'].split("\n");
 
     getData('circles');
     getData('followers');
@@ -49,11 +55,16 @@ function doMark() {
             var followers_fg = (followers.indexOf(oid) >= 0)? true: false;
             var myid_fg      = (oid == userid)? true: false;
 
-            if      (circles_fg && followers_fg) { if (show['both'] == 'true') addMark(link[i], show['both_str']) } // 両想い
-            else if (circles_fg)                 { if (show['love'] == 'true') addMark(link[i], show['love_str']) } // 片想い
-            else if (followers_fg)               { if (show['orz']  == 'true') addMark(link[i], show['orz_str']) } // ストーカー
-            else if (myid_fg)                    { if (show['me']   == 'true') addMark(link[i], show['me_str']) } // 自分
-            else                                                             { addMark(link[i], null) } // 他人
+            if (favs.indexOf(oid) >=0) {
+                // 指定したユーザー
+                addMark(link[i], show['fav_str']);
+            } else {
+                if      (circles_fg && followers_fg) { if (show['both'] == 'true') addMark(link[i], show['both_str']) } // 両想い
+                else if (circles_fg)                 { if (show['love'] == 'true') addMark(link[i], show['love_str']) } // 片想い
+                else if (followers_fg)               { if (show['orz']  == 'true') addMark(link[i], show['orz_str']) } // ストーカー
+                else if (myid_fg)                    { if (show['me']   == 'true') addMark(link[i], show['me_str']) } // 自分
+                else                                                             { addMark(link[i], null) } // 他人
+            }
         }
     }
 }
@@ -84,12 +95,6 @@ function getData(kind) {
             if(ajax1.responseText.match(/\"(AObGSA.*:\d*)\"/)){
                 var sendid = RegExp.$1;   		 //SendIdの取得
                 userid = (ajax1.responseText.match(/data\:\s\[\"(\d+)\"/))? RegExp.$1: 0;
-                // if (ajax1.responseText.match(/data\:\s\[\"(\d+)\"/)) {
-                //     userid = RegExp.$1;
-                // } else {
-                //     userid = 0;
-                // }
-                // userid = ? RegExp.$1: 0; // ユーザーIDの取得
 
                 var ajax2 = new XMLHttpRequest();
                 ajax2.onreadystatechange = function() {
