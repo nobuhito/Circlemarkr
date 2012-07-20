@@ -1,0 +1,83 @@
+<html>
+<meta charset="UTF-8">
+<head>
+<title>Circlemarkr</title>
+<script src="options.js"></script>
+<style>
+body {
+    margin:0;
+    padding:0;
+}
+#logo {
+    position: absolute;
+    right: 50px;
+    top: 50px;
+
+}
+#wrap {
+    position:absolute;
+    width:400px;
+    height:100px;
+    left:50%;
+    top:50%;
+    margin-left:-100px;
+    margin-top:-200px;
+}
+#r {
+    color: #FF5555;
+}
+h1 {
+    font-family: 'trebuchet MS'
+}
+#form {
+    margin: 1em;
+    top: 1em;
+}
+input {
+    font-size: 120%;
+}
+</style>
+</head>
+<body>
+  <div id="logo">
+    <img src='icon128.png'>
+    </div>
+  <div id="wrap">
+    <h1><i>Circlemark<span id='r'>r</span></i></h1>
+    表示させたいマークをチェックしてください<br>
+    ボックスの文字を変えるとマークを変えることができます
+    <div id="form">
+      <table>
+        <tr>
+          <td><input type="checkbox" id="both" name='both' value='true' /></td>
+          <td>両想い</td>
+          <td><input type="text" id="both_str" value="" size="5"></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" id="love" name='love' value='true'/></td>
+          <td>片思い</td>
+          <td><input type="text" id="love_str" value="" size="5"></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" id="orz" name='orz' value='true'/></td>
+          <td>...</td>
+          <td><input type="text" id="orz_str" value="" size="5"></td>
+        </tr>
+        <tr>
+          <td><input type="checkbox" id="me" name='me' value='true'/></td>
+          <td>自分</td>
+          <td><input type="text" id="me_str" value="" size="5"></td>
+        </tr>
+        <tr>
+          <td colspan=2>
+            <input type="button" value="保存" id="submit" />
+          </td>
+          <td>
+            <div id="status"></div>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

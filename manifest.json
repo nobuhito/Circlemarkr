@@ -1,0 +1,27 @@
+{
+    "name": "Circlemarkr",
+    "version": "1.32",
+    "description": "G+のユーザーにマークを付けます",
+    "homepage_url": "https://plus.google.com/b/112102646198561777507/",
+    "update_url": "https://dl.dropbox.com/s/yq189pzyul8s84r/updates.xml?dl=1",
+    "options_page": "options.html",
+    "background": {
+        "scripts": ["background.js"]
+    },
+    "icons": {
+        "128": "icon128.png",
+        "48": "icon48.png"
+    },
+    "content_scripts": [
+        {
+            "js": [
+                "Circlemarkr.js"
+            ],
+            "matches": [
+                "https://plus.google.com/*"
+            ],
+            "all_frames": true
+        }
+    ],
+    "manifest_version": 2
+}
