@@ -13,8 +13,8 @@ chrome.extension.sendRequest({
         'me'   : 'true',
         'fav'  : 'true',
         'both_str': '♥',
-        'love_str': '▶',
-        'orz_str': '◀',
+        'love_str': '◀',
+        'orz_str': '▶',
         'me_str': '★',
         'fav_str': '●',
         'fav_list': ''
@@ -55,7 +55,7 @@ function doMark() {
             var followers_fg = (followers.indexOf(oid) >= 0)? true: false;
             var myid_fg      = (oid == userid)? true: false;
 
-            if (favs.indexOf(oid) >=0) {
+            if (show['fav'] == 'true' && favs.indexOf(oid) >=0) {
                 // 指定したユーザー
                 addMark(link[i], show['fav_str']);
             } else {
