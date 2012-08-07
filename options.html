@@ -48,7 +48,8 @@ tr {
   <div id="wrap">
     <h1><i>Circlemark<span id='r'>r</span></i></h1>
     表示させたいマークをチェックしてください<br>
-    ボックスの文字を変えるとマークを変えることができます
+    ボックスの文字を変えるとマークを変えることができます<br>
+    表示色を変更したい場合はマークの脇のボタンをクリックして指定してください<br>
     <div id="form">
       <table>
         <tr>
@@ -60,26 +61,31 @@ tr {
           <td><input type="checkbox" id="both" name='both' value='true' /></td>
           <td>両想い</td>
           <td><input type="text" id="both_str" value="" size="10"></td>
+          <td><input type="color" id="both_color"></td> <!-- lightpink -->
         </tr>
         <tr>
           <td><input type="checkbox" id="love" name='love' value='true'/></td>
           <td>片思い</td>
           <td><input type="text" id="love_str" value="" size="10"></td>
+          <td><input type="color" id="love_color"></td> <!-- lightslategray -->
         </tr>
         <tr>
           <td><input type="checkbox" id="orz" name='orz' value='true'/></td>
           <td>...</td>
           <td><input type="text" id="orz_str" value="" size="10"></td>
+          <td><input type="color" id="orz_color"></td> <!-- lightslategray -->
         </tr>
         <tr>
           <td><input type="checkbox" id="me" name='me' value='true'/></td>
           <td>自分</td>
           <td><input type="text" id="me_str" value="" size="10"></td>
+          <td><input type="color" id="me_color"></td>
         </tr>
         <tr>
           <td><input type="checkbox" id="fav" name='fav' value='true'/></td>
           <td><textarea id='fav_list' placeholder="改行区切りでユーザーIDを入力"></textarea></td>
           <td><input type="text" id="fav_str" value="" size="10"></td>
+          <td><input type="color" id="fav_color"></td>
         </tr>
         <tr>
           <td colspan=2>
@@ -91,6 +97,7 @@ tr {
         </tr>
       </table>
     </div>
+    設定変更後はG+を再読込してください
   </div>
 </body>
 </html>

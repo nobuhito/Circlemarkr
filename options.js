@@ -1,20 +1,42 @@
+var config = [
+    {
+        'name':  'both',
+        'str':   '♥',
+        'color': "#ffb6c1",
+        'type':  'text'},
+    {
+        'name':  'love',
+        'str':   '◀',
+        'color': "#778899",
+        'type':  'text'},
+    {
+        'name':  'orz',
+        'str':    '▶',
+        'color':  "#778899",
+        'type':   'text'},
+    {
+        'name':  'me',
+        'str':   '★',
+        'color': "#F9F06F",
+        'type':  'text'},
+    {
+        'name':  'fav',
+        'str':   '●',
+        'color': "#c90926",
+        'type':  'textarea'}
+];
+
 function $(id) {
     return document.getElementById(id);
 }
 
 function save_options() {
-    localStorage["both"] = $('both').checked;
-    localStorage["love"] = $('love').checked;
-    localStorage["orz"]  = $('orz').checked;
-    localStorage["me"]   = $('me').checked;
-    localStorage["fav"]  = $('fav').checked;
-
-    localStorage["both_str"] = $('both_str').value;
-    localStorage["love_str"] = $('love_str').value;
-    localStorage["orz_str"]  = $('orz_str').value;
-    localStorage["me_str"]   = $('me_str').value;
-    localStorage["fav_str"]  = $('fav_str').value;
-
+    for (var i=0; i<config.length; i++) {
+        var name = config[i].name;
+        localStorage[name] = $(config[i].name).checked;
+        localStorage[name + '_str'] = $(name + '_str').value;
+        localStorage[name + '_color'] = $(name + '_color').value;
+    }
     localStorage["fav_list"] = $('fav_list').value;
 
     var status = document.getElementById("status");
@@ -22,27 +44,34 @@ function save_options() {
     setTimeout(function() {
         status.innerHTML = "";
     }, 500);
-
 }
 
 function restore_options() {
 
-    $('both').checked = (localStorage["both"] != 'false')? true: false;
-    $('love').checked = (localStorage["love"] != 'false')? true: false;
-    $('orz').checked  = (localStorage["orz"]  != 'false')? true: false;
-    $('me').checked   = (localStorage["me"]   != 'false')? true: false;
-    $('fav').checked  = (localStorage["fav"]  != 'false')? true: false;
-
-    $('both_str').value = (localStorage['both_str'] || '♥');
-    $('love_str').value = (localStorage['love_str'] || '◀');
-    $('orz_str').value  = (localStorage['orz_str']  || '▶');
-    $('me_str').value   = (localStorage['me_str']   || '★');
-    $('fav_str').value  = (localStorage['fav_str']  || '●');
-
+    for (var i=0; i<config.length; i++) {
+        var name = config[i].name;
+        console.log(name);
+        $(name).checked = (localStorage[name] != 'false')? true: false;
+        $(name + '_str').value = (localStorage[name + '_str'] || config[i].str);
+        $(name + '_color').value = (localStorage[name + '_color'] || config[i].color);
+        change_color(name);
+    }
     $('fav_list').value = (localStorage['fav_list'] || '');
 }
 
+function change_color(kind) {
+    $(kind + "_str").style.color = $(kind + "_color").value;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
-    restore_options();
     $('submit').addEventListener('click', save_options);
+    for (var i=0; i<config.length; i++) {
+        var name = config[i].name;
+        $(name + '_color').addEventListener(
+            'change',
+            function() {
+                change_color(this.id.split('_')[0]);
+            });
+    }
+    restore_options();
 });

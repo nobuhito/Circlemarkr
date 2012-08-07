@@ -3,24 +3,22 @@ var followers = [];
 var favs = [];
 var userid = 0;
 var show = [];
+var args = {};
+
+for (var i=0; i<config.length; i++) {
+    args[config[i].name] = 'true';
+    args[config[i].name + '_str'] = config[i].str;
+    args[config[i].name + '_color'] = config[i].color;
+}
+args.fav_list = '';
 
 chrome.extension.sendRequest({
     action: "getValues",
-    args  : [{
-        'both' : 'true',
-        'love' : 'true',
-        'orz'  : 'true',
-        'me'   : 'true',
-        'fav'  : 'true',
-        'both_str': '♥',
-        'love_str': '◀',
-        'orz_str': '▶',
-        'me_str': '★',
-        'fav_str': '●',
-        'fav_list': ''
-    }]
+    args :[args]
 }, function(response) {
     show = response.values;
+
+    addStyle();
 
     favs = show['fav_list'].split("\n");
 
@@ -30,10 +28,21 @@ chrome.extension.sendRequest({
     setInterval(doMark, 500);
 });
 
+function addStyle() {
+    var style = document.createElement("style");
+    style.innerHTML = '';
+    for (var i=0; i<config.length; i++) {
+        var name = config[i].name;
+        style.innerHTML += "span.myMark" + name + "{color:" + show[name + '_color'] + "}";
+    }
+    document.getElementsByTagName("head")[0].appendChild(style);
+}
+
 // マーク追加
-function addMark(elem, str) {
+function addMark(elem, str, kind) {
     elem.classList.add('myMark');
-    if (str) elem.innerHTML += ' ' + str;
+    var span = "<span class='myMark" + kind + "'>" + str + "</span>";
+    if (str) elem.innerHTML += ' ' + span;
 }
 
 // マーク追加判定
@@ -46,7 +55,7 @@ function doMark() {
             var oid = link[i].getAttribute('oid');
 
             // imgタグを持ってる時は加工しない
-            if (link[i].innerHTML != link[i].innerText) { addMark(link[i], null); continue }
+            if (link[i].innerHTML != link[i].innerText) { addMark(link[i], null, null); continue }
 
             // コメントの返信の時はスキップ(Replies and more for Google+の問題？っぽくて効果なし)
             // if (link[i].classList.contains('btnplus' + oid)) { continue }
@@ -57,12 +66,12 @@ function doMark() {
 
             if (show['fav'] == 'true' && favs.indexOf(oid) >=0) {
                 // 指定したユーザー
-                addMark(link[i], show['fav_str']);
+                addMark(link[i], show['fav_str'], 'Fav');
             } else {
-                if      (circles_fg && followers_fg) { if (show['both'] == 'true') addMark(link[i], show['both_str']) } // 両想い
-                else if (circles_fg)                 { if (show['love'] == 'true') addMark(link[i], show['love_str']) } // 片想い
-                else if (followers_fg)               { if (show['orz']  == 'true') addMark(link[i], show['orz_str']) } // ストーカー
-                else if (myid_fg)                    { if (show['me']   == 'true') addMark(link[i], show['me_str']) } // 自分
+                if      (circles_fg && followers_fg) { if (show['both'] == 'true') addMark(link[i], show['both_str'], 'both') } // 両想い
+                else if (circles_fg)                 { if (show['love'] == 'true') addMark(link[i], show['love_str'], 'love') } // 片想い
+                else if (followers_fg)               { if (show['orz']  == 'true') addMark(link[i], show['orz_str'], 'orz') } // ストーカー
+                else if (myid_fg)                    { if (show['me']   == 'true') addMark(link[i], show['me_str'], 'me') } // 自分
                 else                                                             { addMark(link[i], null) } // 他人
             }
         }
