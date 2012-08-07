@@ -6,6 +6,7 @@
     "options_page": "options.html",
     "background": {
         "scripts": [
+            "config.js",
             "background.js"
         ]
     },
@@ -16,7 +17,7 @@
     "content_scripts": [
         {
             "js": [
-                "options.js",
+                "config.js",
                 "Circlemarkr.js"
             ],
             "matches": [
