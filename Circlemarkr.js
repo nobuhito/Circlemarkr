@@ -66,7 +66,7 @@ function doMark() {
 
             if (show['fav'] == 'true' && favs.indexOf(oid) >=0) {
                 // 指定したユーザー
-                addMark(link[i], show['fav_str'], 'Fav');
+                addMark(link[i], show['fav_str'], 'fav');
             } else {
                 if      (circles_fg && followers_fg) { if (show['both'] == 'true') addMark(link[i], show['both_str'], 'both') } // 両想い
                 else if (circles_fg)                 { if (show['love'] == 'true') addMark(link[i], show['love_str'], 'love') } // 片想い
