@@ -1,6 +1,7 @@
 var circles = [];
 var followers = [];
 var favs = [];
+var importants = [];
 var userid = 0;
 var show = [];
 var args = {};
@@ -11,6 +12,7 @@ for (var i=0; i<config.length; i++) {
     args[config[i].name + '_color'] = config[i].color;
 }
 args.fav_list = '';
+args.important_list = '';
 
 chrome.extension.sendRequest({
     action: "getValues",
@@ -64,7 +66,10 @@ function doMark() {
             var followers_fg = (followers.indexOf(oid) >= 0)? true: false;
             var myid_fg      = (oid == userid)? true: false;
 
-            if (show['fav'] == 'true' && favs.indexOf(oid) >=0) {
+            if (show['important'] == 'true' && importants.indexOf(oid) >= 0) {
+                // 指定したサークル
+                addMark(link[i], show['important_str'], 'important');
+            } else if (show['fav'] == 'true' && favs.indexOf(oid) >=0) {
                 // 指定したユーザー
                 addMark(link[i], show['fav_str'], 'fav');
             } else {
@@ -87,11 +92,34 @@ function getAccount() {
 
 // ユーザー配列作成
 function createUserList(kind, res) {
-    var data = eval('//' + res)
+    var data = eval('//' + res);
     var list = data[0][2];
     for (i = 0; i < list.length; i++) {
         if (list[i][0] != null && list[i][0] !== void 0) {
             eval(kind + ".push(list[i][0][2])");
+        }
+    }
+}
+
+function createCircleList(res) {
+    var data = eval('//' + res);
+    var circle_list = data[0][1];
+    var user_list = data[0][2];
+    var important_names = show['important_list'].split("\n");
+
+    var ids = [];
+    for (i=0; i < circle_list.length; i++) {
+        if (important_names.indexOf(circle_list[i][1][0]) >= 0) {
+            ids.push(circle_list[i][0][0]);
+        }
+    }
+
+    for (i=0; i<user_list.length; i++) {
+        var c = user_list[i][3];
+        for (j=0; j<c.length; j++) {
+            if (ids.indexOf(c[j][2][0]) >= 0) {
+                importants.push(user_list[i][0][2]);
+            }
         }
     }
 }
@@ -109,6 +137,9 @@ function getData(kind) {
                 ajax2.onreadystatechange = function() {
                     if (ajax2.readyState == 4 && ajax2.status == 200) {
                         createUserList(kind, ajax2.responseText);
+                        if (kind == 'circles') {
+                            createCircleList(ajax2.responseText);
+                        }
                     }
                 };
 

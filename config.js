@@ -23,5 +23,10 @@ var config = [
         'name':  'fav',
         'str':   '●',
         'color': "#c90926",
+        'type':  'textarea'},
+    {
+        'name':  'important',
+        'str':   '✦',
+        'color': "#c90926",
         'type':  'textarea'}
 ];

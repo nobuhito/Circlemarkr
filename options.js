@@ -10,6 +10,7 @@ function save_options() {
         localStorage[name + '_color'] = $(name + '_color').value;
     }
     localStorage["fav_list"] = $('fav_list').value;
+    localStorage["important_list"] = $('important_list').value;
 
     var status = document.getElementById("status");
     status.innerHTML = "保存中.";
@@ -29,6 +30,7 @@ function restore_options() {
         change_color(name);
     }
     $('fav_list').value = (localStorage['fav_list'] || '');
+    $('important_list').value = (localStorage["important_list"] || '');
 }
 
 function change_color(kind) {
