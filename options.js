@@ -40,6 +40,15 @@ function change_color(kind) {
     $(kind + "_str").style.color = $(kind + "_color").value;
 }
 
+function resize_textarea(el) {
+    var value = el.value;
+    var lines = 2;
+    for (var i = 0, l = value.length; i < l; i++) {
+        if (value.charAt(i) == "\n") lines++;
+    }
+    el.setAttribute("rows", lines);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     $('submit').addEventListener('click', save_options);
     for (var i=0; i<config.length; i++) {
@@ -49,6 +58,13 @@ document.addEventListener('DOMContentLoaded', function() {
             function() {
                 change_color(this.id.split('_')[0]);
             });
+        if (name == 'fav' || name == 'important') {
+            $(name + '_list').addEventListener(
+                'keyup',
+                function() {
+                    resize_textarea(this);
+                });
+        }
     }
     restore_options();
 });
