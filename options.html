@@ -17,12 +17,12 @@ body {
 }
 #wrap {
     position:absolute;
-    width:400px;
-    height:100px;
+    width:500px;
+    height:500px;
     left:50%;
     top:50%;
-    margin-left:-100px;
-    margin-top:-200px;
+    margin-left:-250px;
+    margin-top:-250px;
 }
 #r {
     color: #FF5555;
@@ -57,42 +57,50 @@ tr {
           <th>有効</th>
           <th>表示内容</th>
           <th>マーク</th>
+          <th>色</th>
+          <th>個別</th>
         </tr>
         <tr>
           <td><input type="checkbox" id="both" name='both' value='true' /></td>
           <td>両想い</td>
           <td><input type="text" id="both_str" value="" size="10"></td>
           <td><input type="color" id="both_color"></td> <!-- lightpink -->
+          <td></td>
         </tr>
         <tr>
           <td><input type="checkbox" id="love" name='love' value='true'/></td>
           <td>片思い</td>
           <td><input type="text" id="love_str" value="" size="10"></td>
           <td><input type="color" id="love_color"></td> <!-- lightslategray -->
+          <td></td>
         </tr>
         <tr>
           <td><input type="checkbox" id="orz" name='orz' value='true'/></td>
           <td>...</td>
           <td><input type="text" id="orz_str" value="" size="10"></td>
           <td><input type="color" id="orz_color"></td> <!-- lightslategray -->
+          <td></td>
         </tr>
         <tr>
           <td><input type="checkbox" id="me" name='me' value='true'/></td>
           <td>自分</td>
           <td><input type="text" id="me_str" value="" size="10"></td>
           <td><input type="color" id="me_color"></td>
+          <td></td>
         </tr>
         <tr>
           <td><input type="checkbox" id="fav" name='fav' value='true'/></td>
           <td><textarea id='fav_list' placeholder="改行区切りでユーザーIDを入力"></textarea></td>
           <td><input type="text" id="fav_str" value="" size="10"></td>
           <td><input type="color" id="fav_color"></td>
+          <td><input type="checkbox" id="fav_sa" name="fav_sa" value="true" /></td>
         </tr>
         <tr>
           <td><input type="checkbox" id="important" name='important' value='true'/></td>
           <td><textarea id='important_list' placeholder="改行区切りでサークル名を入力"></textarea></td>
           <td><input type="text" id="important_str" value="" size="10"></td>
           <td><input type="color" id="important_color"></td>
+          <td><input type="checkbox" id="important_sa" name="important_sa" value="true" /></td>
         </tr>
         <tr>
           <td colspan=2>

@@ -5,12 +5,14 @@ function $(id) {
 function save_options() {
     for (var i=0; i<config.length; i++) {
         var name = config[i].name;
-        localStorage[name] = $(config[i].name).checked;
+        localStorage[name] = $(name).checked;
         localStorage[name + '_str'] = $(name + '_str').value;
         localStorage[name + '_color'] = $(name + '_color').value;
     }
     localStorage["fav_list"] = $('fav_list').value;
+    localStorage["fav_sa"] = $('fav_sa').value;
     localStorage["important_list"] = $('important_list').value;
+    localStorage["important_sa"] = $('important_sa').value;
 
     var status = document.getElementById("status");
     status.innerHTML = "保存中.";
@@ -23,14 +25,15 @@ function restore_options() {
 
     for (var i=0; i<config.length; i++) {
         var name = config[i].name;
-        console.log(name);
         $(name).checked = (localStorage[name] != 'false')? true: false;
         $(name + '_str').value = (localStorage[name + '_str'] || config[i].str);
         $(name + '_color').value = (localStorage[name + '_color'] || config[i].color);
         change_color(name);
     }
     $('fav_list').value = (localStorage['fav_list'] || '');
+    $('fav_sa').checked = (localStorage['fav_sa'] != 'false')? true: false;
     $('important_list').value = (localStorage["important_list"] || '');
+    $('important_sa').checked = (localStorage['important_sa'] != 'false')? true: false;
 }
 
 function change_color(kind) {

@@ -12,7 +12,9 @@ for (var i=0; i<config.length; i++) {
     args[config[i].name + '_color'] = config[i].color;
 }
 args.fav_list = '';
+args.fav_sa = 'true';
 args.important_list = '';
+args.important_sa = 'true';
 
 chrome.extension.sendRequest({
     action: "getValues",
@@ -66,10 +68,10 @@ function doMark() {
             var followers_fg = (followers.indexOf(oid) >= 0)? true: false;
             var myid_fg      = (oid == userid)? true: false;
 
-            if (show['important'] == 'true' && importants.indexOf(oid) >= 0) {
+            if (show['important'] == 'true' && importants.indexOf(oid) >= 0 && show['important_sa'] != 'true') {
                 // 指定したサークル
                 addMark(link[i], show['important_str'], 'important');
-            } else if (show['fav'] == 'true' && favs.indexOf(oid) >=0) {
+            } else if (show['fav'] == 'true' && favs.indexOf(oid) >=0 && show['fav_sa'] != 'true') {
                 // 指定したユーザー
                 addMark(link[i], show['fav_str'], 'fav');
             } else {
@@ -78,6 +80,14 @@ function doMark() {
                 else if (followers_fg)               { if (show['orz']  == 'true') addMark(link[i], show['orz_str'], 'orz') } // ストーカー
                 else if (myid_fg)                    { if (show['me']   == 'true') addMark(link[i], show['me_str'], 'me') } // 自分
                 else                                                             { addMark(link[i], null) } // 他人
+            }
+
+            if (show['important'] == 'true' && importants.indexOf(oid) >= 0 && show['important_sa'] == 'true') {
+                addMark(link[i], show['important_str'], 'important');
+            }
+
+            if (show['fav'] == 'true' && favs.indexOf(oid) >= 0 && show['fav_sa'] == 'true') {
+                addMark(link[i], show['fav_str'], 'fav');
             }
         }
     }
