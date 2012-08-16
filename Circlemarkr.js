@@ -2,6 +2,8 @@ var circles = [];
 var followers = [];
 var favs = [];
 var importants = [];
+var circle_data = {};
+var user_data = {};
 var userid = 0;
 var show = [];
 var args = {};
@@ -37,16 +39,24 @@ function addStyle() {
     style.innerHTML = '';
     for (var i=0; i<config.length; i++) {
         var name = config[i].name;
-        style.innerHTML += "span.myMark" + name + "{color:" + show[name + '_color'] + "}";
+        style.innerHTML += "span.myMark" + name + "{color:" + show[name + '_color'] + ";padding-left:3px}";
+        style.innerHTML += "span.myPointer{cursor: pointer}";
     }
     document.getElementsByTagName("head")[0].appendChild(style);
 }
 
 // マーク追加
-function addMark(elem, str, kind) {
+function addMark(elem, str, kind, circles) {
     elem.classList.add('myMark');
-    var span = "<span class='myMark" + kind + "'>" + str + "</span>";
-    if (str) elem.innerHTML += ' ' + span;
+    if (str) {
+        var span = document.createElement('span');
+        span.classList.add('myMark' + kind);
+        span.classList.add('myPointer');
+        if (circles && circles.length > 0) span.setAttribute('title', circles.join(', '));
+        var mark = document.createTextNode(str);
+        span.appendChild(mark);
+        elem.parentNode.insertBefore(span, elem.nextSibling);
+    }
 }
 
 // マーク追加判定
@@ -68,27 +78,30 @@ function doMark() {
             var followers_fg = (followers.indexOf(oid) >= 0)? true: false;
             var myid_fg      = (oid == userid)? true: false;
 
-            if (show['important'] == 'true' && importants.indexOf(oid) >= 0 && show['important_sa'] != 'true') {
-                // 指定したサークル
-                addMark(link[i], show['important_str'], 'important');
-            } else if (show['fav'] == 'true' && favs.indexOf(oid) >=0 && show['fav_sa'] != 'true') {
-                // 指定したユーザー
-                addMark(link[i], show['fav_str'], 'fav');
-            } else {
-                if      (circles_fg && followers_fg) { if (show['both'] == 'true') addMark(link[i], show['both_str'], 'both') } // 両想い
-                else if (circles_fg)                 { if (show['love'] == 'true') addMark(link[i], show['love_str'], 'love') } // 片想い
-                else if (followers_fg)               { if (show['orz']  == 'true') addMark(link[i], show['orz_str'], 'orz') } // ストーカー
-                else if (myid_fg)                    { if (show['me']   == 'true') addMark(link[i], show['me_str'], 'me') } // 自分
-                else                                                             { addMark(link[i], null) } // 他人
-            }
-
             if (show['important'] == 'true' && importants.indexOf(oid) >= 0 && show['important_sa'] == 'true') {
-                addMark(link[i], show['important_str'], 'important');
+                addMark(link[i], show['important_str'], 'important', []);
             }
 
             if (show['fav'] == 'true' && favs.indexOf(oid) >= 0 && show['fav_sa'] == 'true') {
-                addMark(link[i], show['fav_str'], 'fav');
+                addMark(link[i], show['fav_str'], 'fav', []);
             }
+
+            var c = (circles.indexOf(oid) >= 0)? user_data[oid]['circle_names']: [];
+
+            if (show['important'] == 'true' && importants.indexOf(oid) >= 0 && show['important_sa'] != 'true') {
+                // 指定したサークル
+                addMark(link[i], show['important_str'], 'important', []);
+            } else if (show['fav'] == 'true' && favs.indexOf(oid) >=0 && show['fav_sa'] != 'true') {
+                // 指定したユーザー
+                addMark(link[i], show['fav_str'], 'fav', []);
+            } else {
+                if      (circles_fg && followers_fg) { if (show['both'] == 'true') addMark(link[i], show['both_str'], 'both', c) } // 両想い
+                else if (circles_fg)                 { if (show['love'] == 'true') addMark(link[i], show['love_str'], 'love', c) } // 片想い
+                else if (followers_fg)               { if (show['orz']  == 'true') addMark(link[i], show['orz_str'], 'orz', c) } // ストーカー
+                else if (myid_fg)                    { if (show['me']   == 'true') addMark(link[i], show['me_str'], 'me', []) } // 自分
+                else                                                             { addMark(link[i], null, []) } // 他人
+            }
+
         }
     }
 }
@@ -105,6 +118,25 @@ function createUserList(kind, res) {
     var data = eval('//' + res);
     var list = data[0][2];
     for (i = 0; i < list.length; i++) {
+
+        var c = function(data, type) {
+            var a = [];
+            for (var j=0; j<data.length; j++) {
+                a.push((type=='names')? circle_data[data[j][2][0]]:
+                                        data[j][2][0]);
+            }
+            return a;
+        };
+
+        if (kind == 'circles') {
+            user_data[list[i][0][2]] = {
+                'name': list[i][2][0],
+                'weight': list[i][2][3],
+                'circle_ids': c(list[i][3], 'ids'),
+                'circle_names': c(list[i][3], 'names')
+            }
+        }
+
         if (list[i][0] != null && list[i][0] !== void 0) {
             eval(kind + ".push(list[i][0][2])");
         }
@@ -119,6 +151,7 @@ function createCircleList(res) {
 
     var ids = [];
     for (i=0; i < circle_list.length; i++) {
+        circle_data[circle_list[i][0][0]] = circle_list[i][1][0];
         if (important_names.indexOf(circle_list[i][1][0]) >= 0) {
             ids.push(circle_list[i][0][0]);
         }
@@ -146,10 +179,10 @@ function getData(kind) {
                 var ajax2 = new XMLHttpRequest();
                 ajax2.onreadystatechange = function() {
                     if (ajax2.readyState == 4 && ajax2.status == 200) {
-                        createUserList(kind, ajax2.responseText);
                         if (kind == 'circles') {
                             createCircleList(ajax2.responseText);
                         }
+                        createUserList(kind, ajax2.responseText);
                     }
                 };
 
