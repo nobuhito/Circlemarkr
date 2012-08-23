@@ -31,9 +31,9 @@ chrome.extension.sendRequest({
     getData('circles');
     getData('followers');
 
-    setInterval(function() { doMark('a', 'oid') }, 500);
-    setInterval(function() { doMark('a', 'o') }, 500);
-    setInterval(function() { doMark('div', 'oid') }, 500);
+    setInterval(function() { doMark('a', 'oid') }, 1000);
+    setInterval(function() { doMark('a', 'o') }, 1000);
+    setInterval(function() { doMark('div', 'oid') }, 1000);
 });
 
 function addStyle() {
@@ -57,7 +57,6 @@ function addMark(elem, str, kind, circles) {
         if (circles && circles.length > 0) span.setAttribute('title', circles.join(', '));
         var mark = document.createTextNode(str);
         span.appendChild(mark);
-        console.log(elem.tagName);
         if (elem.tagName == 'DIV') {
             elem.childNodes[1].insertBefore(span);
         } else {
