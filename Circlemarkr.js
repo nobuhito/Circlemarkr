@@ -31,7 +31,9 @@ chrome.extension.sendRequest({
     getData('circles');
     getData('followers');
 
-    setInterval(doMark, 500);
+    setInterval(function() { doMark('a', 'oid') }, 500);
+    setInterval(function() { doMark('a', 'o') }, 500);
+    setInterval(function() { doMark('div', 'oid') }, 500);
 });
 
 function addStyle() {
@@ -55,21 +57,26 @@ function addMark(elem, str, kind, circles) {
         if (circles && circles.length > 0) span.setAttribute('title', circles.join(', '));
         var mark = document.createTextNode(str);
         span.appendChild(mark);
-        elem.parentNode.insertBefore(span, elem.nextSibling);
+        console.log(elem.tagName);
+        if (elem.tagName == 'DIV') {
+            elem.childNodes[1].insertBefore(span);
+        } else {
+            elem.parentNode.insertBefore(span, elem.nextSibling);
+        }
     }
 }
 
 // マーク追加判定
-function doMark() {
+function doMark(elm, attr) {
     // G+のユーザーIDを持ってるリンクをリストアップ
-    var link = document.querySelectorAll("a[oid]:not(.myMark)");
+    var link = document.querySelectorAll(elm + "[" + attr + "]:not(.myMark)");
     // var link = document.querySelectorAll("a[oid][rel$='nofollow']:not(.myMark)");
     if (circles.length > 0 && followers.length > 0) {
         for (i=0; i<link.length; i++) {
-            var oid = link[i].getAttribute('oid');
+            var oid = link[i].getAttribute(attr);
 
-            // imgタグを持ってる時は加工しない
-            if (link[i].innerHTML != link[i].innerText) { addMark(link[i], null, null); continue }
+            // aリンクでimgタグを持ってる時は加工しない
+            if (elm == 'a' && link[i].innerHTML != link[i].innerText) { addMark(link[i], null, null); continue }
 
             // コメントの返信の時はスキップ(Replies and more for Google+の問題？っぽくて効果なし)
             // if (link[i].classList.contains('btnplus' + oid)) { continue }
@@ -99,7 +106,7 @@ function doMark() {
                 else if (circles_fg)                 { if (show['love'] == 'true') addMark(link[i], show['love_str'], 'love', c) } // 片想い
                 else if (followers_fg)               { if (show['orz']  == 'true') addMark(link[i], show['orz_str'], 'orz', c) } // ストーカー
                 else if (myid_fg)                    { if (show['me']   == 'true') addMark(link[i], show['me_str'], 'me', []) } // 自分
-                else                                                             { addMark(link[i], null, []) } // 他人
+                else                                                             { addMark(link[i], '', null, []) } // 他人
             }
 
         }
