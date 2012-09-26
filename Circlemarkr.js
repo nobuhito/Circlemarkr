@@ -60,7 +60,7 @@ function addMark(elem, str, kind, circles) {
         if (circles && circles.length > 0) span.setAttribute('title', circles.join(', '));
         var mark = document.createTextNode(str);
         span.appendChild(mark);
-        if (elem.tagName == 'DIV') {
+        if (elem.tagName == 'DIV' || elem.tagName == 'div') {
             if (elem.childNodes.length > 1) {
                 elem.childNodes[1].insertBefore(span);
             } else {
