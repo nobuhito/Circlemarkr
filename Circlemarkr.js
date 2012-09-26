@@ -61,7 +61,11 @@ function addMark(elem, str, kind, circles) {
         var mark = document.createTextNode(str);
         span.appendChild(mark);
         if (elem.tagName == 'DIV') {
-            elem.childNodes[1].insertBefore(span);
+            if (elem.childNodes.length > 1) {
+                elem.childNodes[1].insertBefore(span);
+            } else {
+                elem.childNodes[0].insertBefore(span);
+            }
         } else {
             elem.parentNode.insertBefore(span, elem.nextSibling);
         }
