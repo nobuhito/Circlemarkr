@@ -1,5 +1,6 @@
 var circles = [];
 var followers = [];
+var news = [];
 var favs = [];
 var importants = [];
 var circle_data = {};
@@ -30,6 +31,8 @@ chrome.extension.sendRequest({
 
     getData('circles');
     getData('followers');
+    setInterval(function() { getData('circles')}, 1000 * 60 * 60);
+    setInterval(function() { getData('followers')}, 1000 * 60 * 60);
 
     setInterval(function() { doMark('a', 'oid') }, 1000);
     setInterval(function() { doMark('a', 'o') }, 1000);
@@ -122,6 +125,17 @@ function getAccount() {
 // ユーザー配列作成
 function createUserList(kind, res) {
     var data = eval('//' + res);
+    var list;
+
+    var list = data[0][1];
+    if (kind == 'followers') {
+        for (i=0; i< list.length; i++) {
+            if (list[i][0] != null && list[i][0] !== void 0) {
+                eval(kind + ".push(list[i][0][2])");
+            }
+        }
+    }
+
     var list = data[0][2];
     for (i = 0; i < list.length; i++) {
 

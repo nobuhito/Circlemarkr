@@ -26,7 +26,7 @@ var config = [
         'type':  'textarea'},
     {
         'name':  'important',
-        'str':   '✓',
+        'str':   '✔',
         'color': "#80FF80",
         'type':  'textarea'}
 ];
