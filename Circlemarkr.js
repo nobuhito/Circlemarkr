@@ -10,21 +10,37 @@ var show = [];
 var args = {};
 
 for (var i=0; i<config.length; i++) {
-    args[config[i].name] = 'true';
+    args[config[i].name] = true;
     args[config[i].name + '_str'] = config[i].str;
     args[config[i].name + '_color'] = config[i].color;
 }
 args.fav_list = '';
-args.fav_sa = 'true';
+args.fav_sa = true;
 args.important_list = '';
-args.important_sa = 'true';
+args.important_sa = true;
 
-chrome.extension.sendRequest({
-    action: "getValues",
-    args :[args]
-}, function(response) {
-    show = response.values;
+chrome.storage.sync.get('options', function(data) {
 
+    if (data.options) {
+        // console.log('read storage sync');
+	      // Chrome storage.syncに移行済み
+	      show = data.options;
+	      start();
+    } else {
+        // console.log('read local storage');
+
+	      // 以前のバックグラウンドデータを読み込み
+	      chrome.extension.sendRequest({
+	          action: "getValues",
+	          args: [args]
+	      }, function(response) {
+	          show = response.values;
+	          start();
+	      });
+    }
+});
+
+function start() {
     addStyle();
 
     favs = show['fav_list'].split("\n");
@@ -37,7 +53,7 @@ chrome.extension.sendRequest({
     setInterval(function() { doMark('a', 'oid') }, 1000);
     setInterval(function() { doMark('a', 'o') }, 1000);
     setInterval(function() { doMark('div', 'oid') }, 1000);
-});
+}
 
 function addStyle() {
     var style = document.createElement("style");
@@ -91,27 +107,27 @@ function doMark(elm, attr) {
             var followers_fg = (followers.indexOf(oid) >= 0)? true: false;
             var myid_fg      = (oid == userid)? true: false;
 
-            if (show['important'] == 'true' && importants.indexOf(oid) >= 0 && show['important_sa'] == 'true') {
+            if (show['important'] && importants.indexOf(oid) >= 0 && show['important_sa']) {
                 addMark(link[i], show['important_str'], 'important', []);
             }
 
-            if (show['fav'] == 'true' && favs.indexOf(oid) >= 0 && show['fav_sa'] == 'true') {
+            if (show['fav'] && favs.indexOf(oid) >= 0 && show['fav_sa']) {
                 addMark(link[i], show['fav_str'], 'fav', []);
             }
 
             var c = (circles.indexOf(oid) >= 0)? user_data[oid]['circle_names']: [];
 
-            if (show['important'] == 'true' && importants.indexOf(oid) >= 0 && show['important_sa'] != 'true') {
+            if (show['important'] && importants.indexOf(oid) >= 0 && !show['important_sa']) {
                 // 指定したサークル
                 addMark(link[i], show['important_str'], 'important', []);
-            } else if (show['fav'] == 'true' && favs.indexOf(oid) >=0 && show['fav_sa'] != 'true') {
+            } else if (show['fav'] && favs.indexOf(oid) >=0 && !show['fav_sa']) {
                 // 指定したユーザー
                 addMark(link[i], show['fav_str'], 'fav', []);
             } else {
-                if      (circles_fg && followers_fg) { if (show['both'] == 'true') addMark(link[i], show['both_str'], 'both', c) } // 両想い
-                else if (circles_fg)                 { if (show['love'] == 'true') addMark(link[i], show['love_str'], 'love', c) } // 片想い
-                else if (followers_fg)               { if (show['orz']  == 'true') addMark(link[i], show['orz_str'], 'orz', c) } // ストーカー
-                else if (myid_fg)                    { if (show['me']   == 'true') addMark(link[i], show['me_str'], 'me', []) } // 自分
+                if      (circles_fg && followers_fg) { if (show['both']) addMark(link[i], show['both_str'], 'both', c) } // 両想い
+                else if (circles_fg)                 { if (show['love']) addMark(link[i], show['love_str'], 'love', c) } // 片想い
+                else if (followers_fg)               { if (show['orz']) addMark(link[i], show['orz_str'], 'orz', c) } // ストーカー
+                else if (myid_fg)                    { if (show['me']) addMark(link[i], show['me_str'], 'me', []) } // 自分
                 else                                                             { addMark(link[i], '', null, []) } // 他人
             }
 

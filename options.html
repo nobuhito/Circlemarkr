@@ -51,14 +51,20 @@ tr {
     表示させたいマークをチェックしてください<br>
     ボックスの文字を変えるとマークを変えることができます<br>
     表示色を変更したい場合はマークの脇のボタンをクリックして指定してください<br>
+
+    <div style="margin-top: 1em">
+      <input type="checkbox" id="storage_sync" name="storage_sync" />
+      <label for="storage_sync">Chromeの同期機能を使って他のパソコンと設定を共有する</label>
+    </div>
+
     <div id="form">
       <table>
         <tr>
-          <th>有効</th>
-          <th>表示内容</th>
-          <th>マーク</th>
-          <th>色</th>
-          <th>個別</th>
+          <th nowrap="nowrap">有効</th>
+          <th nowrap="nowrap">表示内容</th>
+          <th nowrap="nowrap">マーク</th>
+          <th nowrap="nowrap">色</th>
+          <th nowrap="nowrap">個別</th>
         </tr>
         <tr>
           <td><input type="checkbox" id="both" name='both' value='true' /></td>
@@ -105,8 +111,9 @@ tr {
         <tr>
           <td colspan=2>
             <input type="button" value="保存" id="submit" />
+            <input type="button" value="リセット" id="reset" />
           </td>
-          <td>
+         <td>
             <div id="status"></div>
           </td>
         </tr>
