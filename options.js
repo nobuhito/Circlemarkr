@@ -82,8 +82,8 @@ function get_local_storage() {
     for (var i=0; i<config.length; i++) {
         var name = config[i].name;
         $(name).checked = (localStorage[name] != 'false')? true: false;
-        $(name + '_str').value = localStorage[name + '_str'];
-        $(name + '_color').value = localStorage[name + '_color'];
+        $(name + '_str').value = localStorage[name + '_str'] || config[i].str;
+        $(name + '_color').value = localStorage[name + '_color'] || config[i].color;
         change_color(name);
     }
     $('fav_list').value = localStorage['fav_list'];
@@ -97,8 +97,8 @@ function get_storage_sync(options) {
     for (var i=0; i<config.length; i++) {
         var name = config[i].name;
         $(name).checked = options[name];
-        $(name + '_str').value = options[name + '_str'];
-        $(name + '_color').value = options[name + '_color'];
+        $(name + '_str').value = options[name + '_str'] || config[i].str;
+        $(name + '_color').value = options[name + '_color'] || config[i].color;
         change_color(name);
     }
     $('fav_list').value = options['fav_list'];

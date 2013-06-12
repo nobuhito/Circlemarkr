@@ -28,5 +28,10 @@ var config = [
         'name':  'important',
         'str':   '✔',
         'color': "#80FF80",
-        'type':  'textarea'}
+        'type':  'textarea'},
+    {
+        'name':  'newer',
+        'str':   '✦',
+        'color': '#D34937',
+        'type':  'text'}
 ];

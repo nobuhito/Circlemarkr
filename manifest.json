@@ -1,6 +1,6 @@
 {
     "name": "Circlemarkr",
-    "version": "4.0",
+    "version": "4.9.3",
     "description": "G+のユーザーにマークを付けます",
     "homepage_url": "https://plus.google.com/b/112102646198561777507/",
     "options_page": "options.html",
@@ -17,6 +17,7 @@
     "content_scripts": [
         {
             "js": [
+                "jquery-1.8.3.min.js",
                 "config.js",
                 "Circlemarkr.js"
             ],
