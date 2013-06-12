@@ -290,7 +290,7 @@ if (!url.match(/^https\:\/\/plus\.google\.com\/hangouts/)) {
 	              log('設定データはLocalStorage');
                 chrome.extension.sendRequest({
                     action: "getValues",
-                    args: [args]
+                    args: args
                 }, function(response) {
                     show = response.values;
 		                log('LocalStorage取得完了');
