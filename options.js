@@ -16,6 +16,7 @@ function set_options(message) {
     options["fav_sa"] = $('fav_sa').value;
     options["important_list"] = $('important_list').value;
     options["important_sa"] = $('important_sa').value;
+    options['analytics'] = $('analytics').checked;
 
     if ($('storage_sync').checked == true) {
 
@@ -39,6 +40,7 @@ function save_local_storage(options) {
     localStorage["fav_sa"] = options["fav_sa"];
     localStorage["important_list"] = options['important_list'];
     localStorage["important_sa"] = options['important_sa'];
+    localStorage["analytics"] = options['analytics'];
 }
 
 function save_storage_sync(options) {
@@ -76,6 +78,7 @@ function get_default() {
     $('fav_sa').checked = true;
     $('important_list').value = '';
     $('important_sa').checked = true;
+    $('analytics').checked = false;
 }
 
 function get_local_storage() {
@@ -90,6 +93,7 @@ function get_local_storage() {
     $('fav_sa').checked = (localStorage['fav_sa'] != 'false')? true: false;
     $('important_list').value = localStorage["important_list"];
     $('important_sa').checked = (localStorage['important_sa'] != 'false')? true: false;
+    $('analytics').checked = (localStorage['analytics'] != 'false')? true: false;
 }
 
 function get_storage_sync(options) {
@@ -105,6 +109,7 @@ function get_storage_sync(options) {
     $('fav_sa').checked = options['fav_sa'];
     $('important_list').value = options["important_list"];
     $('important_sa').checked = options['important_sa'];
+    $('analytics').checked = options['analytics'];
 }
 
 function read_options() {

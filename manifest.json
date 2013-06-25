@@ -5,12 +5,13 @@
     "homepage_url": "https://plus.google.com/b/112102646198561777507/",
     "options_page": "options.html",
     "background": {
-        "scripts": [
-            "gaq.js",
-            "jquery-1.8.3.min.js",
-            "config.js",
-            "background.js"
-        ],
+        "page": "background.html",
+        // "scripts": [
+        //     "gaq.js",
+        //     "jquery-1.8.3.min.js",
+        //     "config.js",
+        //     "background.js"
+        // ],
         "persistent": false
     },
     "icons": {
@@ -30,10 +31,11 @@
             "all_frames": true
         }
     ],
-    "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+    "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com; object-src 'self'",
     "permissions": [
         "storage",
         "https://plus.google.com/*",
+        "https://ssl.google-analytics.com/*",
         "tabs",
         "alarms",
         "webNavigation"
