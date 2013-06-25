@@ -93,7 +93,7 @@ function get_local_storage() {
     $('fav_sa').checked = (localStorage['fav_sa'] != 'false')? true: false;
     $('important_list').value = localStorage["important_list"];
     $('important_sa').checked = (localStorage['important_sa'] != 'false')? true: false;
-    $('analytics').checked = (localStorage['analytics'] != 'false')? true: false;
+    $('analytics').checked = (localStorage['analytics'] == 'true')? true: false;
 }
 
 function get_storage_sync(options) {
