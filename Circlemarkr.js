@@ -2,6 +2,14 @@ var Circlemarkr = (function() {
     function Circlemarkr() {}
 
     Circlemarkr.prototype.init = function(config, show) {
+        var cm = this;
+        chrome.runtime.onMessage.addListener(
+            function(request, sender, sendResponse) {
+                cm.setData(request.data);
+                sendResponse({status: 'OK'});
+                return true;
+        });
+
         this.myMark = 'myMark';
         this.myPointer = 'myPointer';
         this.account = this.getAccount();
@@ -17,10 +25,7 @@ var Circlemarkr = (function() {
         this.circle_data = [];
         this.user_data = [];
 
-        this.refreshData();
-
         this.addStyle(config);
-        setInterval(this.refreshData, this.refreshInterval);
     };
 
     Circlemarkr.prototype.getMyMark = function() {
@@ -56,8 +61,6 @@ var Circlemarkr = (function() {
         var mark = document.createTextNode(this.show[flag + '_str']);
         span.appendChild(mark);
         if (elem.tagName.match(/div/i)) {
-//            if (elem.childNodes.length > 1) {
-//            if (elem.childNodes.length == 1) {
 
             if (location.href.match(/events/)) {
                 // イベントの参加者一覧
@@ -74,7 +77,6 @@ var Circlemarkr = (function() {
                 elem.childNodes[5].insertBefore(span);
             } else {
                 elem.parentNode.insertBefore(span, elem.nextSibling);
-                //elem.childNodes[0].insertBefore(span);
             }
         } else {
             elem.parentNode.insertBefore(span, elem.nextSibling);
@@ -96,11 +98,6 @@ var Circlemarkr = (function() {
             style.innerHTML = str;
         }
         document.getElementsByTagName("head")[0].appendChild(style);
-    };
-
-    Circlemarkr.prototype.refreshData = function() {
-        this.getData('circles');
-        this.getData('followers');
     };
 
     Circlemarkr.prototype.isNewer = function(id) {
@@ -144,7 +141,7 @@ var Circlemarkr = (function() {
     };
 
     Circlemarkr.prototype.createNewFollowList = function(res) {
-        var data = eval('//' + res);
+        var data = res;
         var list = data[0][1];
 
         for (var i = 0; i < list.length; i++) {
@@ -156,7 +153,7 @@ var Circlemarkr = (function() {
     };
 
     Circlemarkr.prototype.createUserList = function(kind, res) {
-        var data = eval('//' + res);
+        var data = res;
         var list;
 
         var c = function(data, type, cd) {
@@ -192,7 +189,7 @@ var Circlemarkr = (function() {
     };
 
     Circlemarkr.prototype.createCircleList = function(res) {
-        var data = eval('//' + res);
+        var data = res;
         var circle_list = data[0][1];
         for (var i = 0; i < circle_list.length; i++) {
             this.circle_data[circle_list[i][0][0]] = circle_list[i][1][0];
@@ -200,7 +197,7 @@ var Circlemarkr = (function() {
     };
 
     Circlemarkr.prototype.createImportantList = function(res) {
-        var data = eval('//' + res);
+        var data = res;
         var circle_list = data[0][1];
         var user_list = data[0][2];
 
@@ -226,29 +223,15 @@ var Circlemarkr = (function() {
         this.favs = show['fav_list'].split("\n");
     };
 
-    Circlemarkr.prototype.getData = function(kind) {
-
-        var m = (kind == 'followers')? '1000000': 'true';
-        var url = ["https://plus.google.com",
-                   "/u/" + this.account,
-                   "/_/socialgraph/lookup/" + kind + "/",
-                   "?m=" + m].join('');
-        var cm = this;
-        $.get("https://plus.google.com/u/" + this.account)
-            .then(function(data) {
-                cm.userId = cm.getUserId(data);
-                $.ajax({url: url, dataType: 'text'})
-                    .then(function(data) {
-                        if (kind == 'circles') {
-                            cm.createCircleList(data);
-                            cm.createImportantList(data);
-                        } else if (kind == 'followers') {
-                            cm.createNewFollowList(data);
-                        }
-                        cm.createUserList(kind, data);
-                        cm.createFavList();
-                    });
-            })
+    Circlemarkr.prototype.setData = function(data) {
+        var json = JSON.parse(data);
+        this.userId = json.userId;
+        this.createCircleList(json.circles);
+        this.createImportantList(json.circles);
+        this.createNewFollowList(json.followers);
+        this.createUserList('circles', json.circles);
+        this.createUserList('followers', json.followers);
+        this.createFavList();
     };
 
     return Circlemarkr;
@@ -268,32 +251,27 @@ for (var i = 0; i < config.length; i++) {
     args[config[i].name + '_color'] = config[i].color;
 }
 
-log('デフォルトデータ取得完了');
-log('設定データ取得開始');
 
 var url = location.href;
 if (!url.match(/^https\:\/\/plus\.google\.com\/hangouts/)) {
     var init_delay = (url.match(/(notifications|apps\-static)/))?
-        Math.floor( Math.random() * 10000 ): 0;
+//        Math.floor( Math.random() * 10000 ): 0;
+        0:0;
+
     setTimeout(function() {
         chrome.storage.sync.get('options', function(data) {
-            log(url);
             if (data.options) {
-	              log('設定データはStorageSync');
 	              show = args;
 	              for (var key in data.options) {
 		                show[key] = data.options[key];
 	              }
-	              log('StorageSync取得完了');
                 start(show);
             } else {
-	              log('設定データはLocalStorage');
-                chrome.extension.sendRequest({
+                chrome.runtime.sendMessage({
                     action: "getValues",
                     args: args
                 }, function(response) {
                     show = response.values;
-		                log('LocalStorage取得完了');
                     start(show);
                 });
             }
@@ -303,29 +281,15 @@ if (!url.match(/^https\:\/\/plus\.google\.com\/hangouts/)) {
 
 var timer = 0;
 function start(show) {
-    log('Circlemarkr作成');
-    circlemarkr = new Circlemarkr();
-    log('初期化開始');
+    var circlemarkr = new Circlemarkr();
     circlemarkr.init(config, show);
-    log('初期化完了');
-//    setTimeout(function() { // データ取得まで遅らせる
-    log('Event登録開始');
-//        document.addEventListener('DOMNodeInserted', function(event) {
+
     document.addEventListener('DOMSubtreeModified', function(event) {
-
-//        if (timer) return;
-//        timer = setTimeout(function() {
-		        log('処理開始');
-            var start = new Date();
-            run(circlemarkr, event.target);
-            var end = new Date();
-            timer = 0;
-		        log('処理完了 time: ' + (end - start) + 'msec at ' + end);
-//        }, 100);
+        var start = new Date();
+        run(circlemarkr, event.target);
+        var end = new Date();
+        timer = 0;
     }, true);
-    //    }, 3000);
-    log('Event登録完了');
-
 }
 
 function run(circlemarkr, target) {
@@ -335,15 +299,19 @@ function run(circlemarkr, target) {
         {tag: 'a', attr: 'o'},
         {tag: 'div', attr: 'oid'},
     ];
-        // log(target);
     for (var i = 0; i < options.length; i++) {
         var elm = options[i].tag;
         var attr = options[i].attr;
-        var selector = elm + '[' + attr + ']:not(.' + circlemarkr.getMyMark() + ')';
-//        var link = document.querySelectorAll(selector);
-        var link = target.querySelectorAll(selector);
-//        var link = $(selector, document.body);
-	log(link.length + 'ターゲット発見');
+        var selector = elm + '[' + attr + ']';
+        selector += ':not(.' + circlemarkr.getMyMark() + ')';
+        try {
+            var link = target.querySelectorAll(selector);
+        } catch(e) {
+            console.log(target);
+        }
+
+        if (link == undefined) continue;
+
         for (var j = 0; j < link.length; j++) {
 
             circlemarkr.setMyMark(link[j]);
@@ -356,26 +324,27 @@ function run(circlemarkr, target) {
 
             var marks;
             marks =['both', 'love', 'orz'];
+
             for (var k = 0; k < marks.length; k++ ) {
                 var key = marks[k];
-                if (circlemarkr.getFlag(oid) == key && circlemarkr.show[key]) {
+                if (circlemarkr.getFlag(oid) ==key && circlemarkr.show[key] == "true") {
                     circlemarkr.addMark(link[j], oid, key);
                 }
             }
 
-            if (circlemarkr.isMe(oid) && circlemarkr.show['me']) {
+            if (circlemarkr.isMe(oid) && circlemarkr.show['me'] == "true") {
                 circlemarkr.addMark(link[j], oid, 'me');
             }
 
-            if (circlemarkr.isImportant(oid) && circlemarkr.show['important']) {
+            if (circlemarkr.isImportant(oid) && circlemarkr.show['important'] == "true") {
                 circlemarkr.addMark(link[j], oid, 'important');
             }
 
-            if (circlemarkr.isFavorite(oid) && circlemarkr.show['fav']) {
+            if (circlemarkr.isFavorite(oid) && circlemarkr.show['fav'] == "true") {
                 circlemarkr.addMark(link[j], oid, 'fav');
             }
 
-            if (circlemarkr.isNewer(oid) && circlemarkr.show['newer']) {
+            if (circlemarkr.isNewer(oid) && circlemarkr.show['newer'] == "true") {
                 circlemarkr.addMark(link[j], oid, 'newer');
             }
         }

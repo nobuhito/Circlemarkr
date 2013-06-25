@@ -2,6 +2,9 @@
 // http://www.eisbahn.jp/yoichiro/2013/02/chrome-extension-event-page.html
 
 var Background = function() {
+    this.push_interval = 30;
+    this.get_interval = 60;
+};
 Background.prototype = {
     getValues: function(list) {
         for (var i in list) {
@@ -18,12 +21,116 @@ Background.prototype = {
     setValue: function(name, value) {
         localStorage[name] = value;
     },
-};
-var background = new Background();
+    getUserId: function(account) {
+        var defer = $.Deferred();
+        $.ajax({
+            url: "https://plus.google.com/u/" + account,
+            success: function(data) {
+                defer.resolve(data.match(/data\:\s\[\"(\d+)\"/)? RegExp.$1: 0);
+            },
+        });
+        return defer.promise();
+    },
+    storeCircleData: function(account, userId, tabId, push) {
+        var self = this;
+        localStorage[userId] = 'loading';
+        $.when(
+            self.fetchCircleData(account, 'followers'),
+            self.fetchCircleData(account, 'circles'),
+            userId
+        ).then(function(followers, circles, userId) {
+            var followers_json = eval('//' + followers[0]);
+            var circles_json = eval('//' + circles[0]);
+            var circle = {
+                'followers': followers_json,
+                'circles'  : circles_json,
+                'userId'   : userId,
+            };
+            localStorage[userId] = JSON.stringify(circle);
 
-chrome.extension.onRequest.addListener( function( message, sender, sendResponse) {
+            if (push) {
+                self.sendCircleData(tabId, circle);
+                var alarmNo = 'push_' + tabId + '_ ' + userId;;
+                chrome.alarms.create(alarmNo, {
+                    "periodInMinutes": self.push_interval
+                });
+            }
+            circle = undefined;
+        });
+    },
+    fetchCircleData: function(account, kind) {
+        var m = (kind == 'followers')? '1000000': 'true';
+        var url = ["https://plus.google.com",
+                   "/u/" + account,
+                   "/_/socialgraph/lookup/" + kind + "/",
+                   "?m=" + m].join('');
+
+        var defer = $.Deferred();
+        $.ajax({
+            url: url,
+            dataType: 'text',
+            success: defer.resolve,
+        });
+        return defer.promise();
+    },
+    sendCircleData: function(tabId, circle) {
+        chrome.tabs.sendMessage(parseInt(tabId), {data: circle});
+    },
+};
+
+var bg = new Background();
+
+chrome.runtime.onMessage.addListener( function( message, sender, sendResponse) {
     if (message.action == 'getValues') {
-        var bgp = background;
-        sendResponse({values : bgp.getValues(message.args)});
+        sendResponse({values : bg.getValues(message.args)});
+    }
+});
+
+chrome.webNavigation.onCompleted.addListener(function(nav) {
+    if (nav.url.match(/^https\:\/\/.*?\.google\.com\//)) {
+        var re = new RegExp(/^https?\:\/\/.*?\.google\.com\/u\/([0-9]+?)\//);
+        var account = nav.url.match(re)? RegExp.$1: 0;
+        var interval = {
+            "periodInMinutes": bg.push_interval,
+        };
+        var tabId = nav.tabId;
+
+        $.ajax({
+            url: "https://plus.google.com/u/" + account,
+        }).done(function(data) {
+            var userId = data.match(/data\:\s\[\"(\d+)\"/)? RegExp.$1: 0;
+
+            var alarmNo = 'get_' + account + '_ ' + userId + '_' + tabId;
+            chrome.alarms.create(alarmNo, interval);
+
+            var circle = localStorage[userId];
+            if (circle == undefined) {
+                bg.storeCircleData(account, userId, tabId, true);
+            } else if (circle == 'loading') {
+                var timer = setInterval(function() {
+                    if (localStorage[userId] != 'loading') {
+                        clearInterval(timer);
+                        bg.sendCircleData(tabId, localStorage[userId]);
+                        var alarmNo = 'push_' + tabId + '_ ' + userId;;
+                        chrome.alarms.create(alarmNo, interval);
+                    }
+                }, 500);
+            } else {
+                bg.sendCircleData(tabId, localStorage[userId]);
+                var alarmNo = 'push_' + tabId + '_ ' + userId;;
+                chrome.alarms.create(alarmNo, interval);
+            }
+            circle = undefined;
+        });
+    }
+});
+
+chrome.alarms.clearAll();
+chrome.alarms.onAlarm.addListener(function(alarm) {
+    var args = alarm.name.split('_');
+    if (args[0] == 'get') {
+        bg.storeCircleData(args[1], args[2], args[3]);
+    } else if (args[0] == 'push') {
+        bg.sendCircleData(args[1], localStorage[args[2]]);
     }
 });
