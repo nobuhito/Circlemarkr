@@ -272,6 +272,9 @@ if (!url.match(/^https\:\/\/plus\.google\.com\/hangouts/)) {
                     args: args
                 }, function(response) {
                     show = response.values;
+                    for (var i in show) {
+                        show[i] = (show[i] == "true")? true: show[i];
+                    }
                     start(show);
                 });
             }
@@ -322,29 +325,27 @@ function run(circlemarkr, target) {
 
             var oid = link[j].getAttribute(attr);
 
-            var marks;
-            marks =['both', 'love', 'orz'];
-
+            var marks = ['both', 'love', 'orz'];
             for (var k = 0; k < marks.length; k++ ) {
                 var key = marks[k];
-                if (circlemarkr.getFlag(oid) ==key && circlemarkr.show[key] == true) {
+                if (circlemarkr.getFlag(oid) ==key && circlemarkr.show[key]) {
                     circlemarkr.addMark(link[j], oid, key);
                 }
             }
 
-            if (circlemarkr.isMe(oid) && circlemarkr.show['me'] == true) {
+            if (circlemarkr.isMe(oid) && circlemarkr.show['me']) {
                 circlemarkr.addMark(link[j], oid, 'me');
             }
 
-            if (circlemarkr.isImportant(oid) && circlemarkr.show['important'] == true) {
+            if (circlemarkr.isImportant(oid) && circlemarkr.show['important']) {
                 circlemarkr.addMark(link[j], oid, 'important');
             }
 
-            if (circlemarkr.isFavorite(oid) && circlemarkr.show['fav'] == true) {
+            if (circlemarkr.isFavorite(oid) && circlemarkr.show['fav']) {
                 circlemarkr.addMark(link[j], oid, 'fav');
             }
 
-            if (circlemarkr.isNewer(oid) && circlemarkr.show['newer'] == true) {
+            if (circlemarkr.isNewer(oid) && circlemarkr.show['newer']) {
                 circlemarkr.addMark(link[j], oid, 'newer');
             }
         }

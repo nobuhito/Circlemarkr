@@ -16,8 +16,6 @@ Background.prototype = {
         if (!localStorage[name]) {
             localStorage[name] = def;
         }
-        localStorage[name] = (localStorage[name] == "ture")?
-            true: localStorage[name];
         return localStorage[name];
     },
     setValue: function(name, value) {
