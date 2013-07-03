@@ -327,24 +327,24 @@ function run(circlemarkr, target) {
 
             for (var k = 0; k < marks.length; k++ ) {
                 var key = marks[k];
-                if (circlemarkr.getFlag(oid) ==key && circlemarkr.show[key] == "true") {
+                if (circlemarkr.getFlag(oid) ==key && circlemarkr.show[key] == true) {
                     circlemarkr.addMark(link[j], oid, key);
                 }
             }
 
-            if (circlemarkr.isMe(oid) && circlemarkr.show['me'] == "true") {
+            if (circlemarkr.isMe(oid) && circlemarkr.show['me'] == true) {
                 circlemarkr.addMark(link[j], oid, 'me');
             }
 
-            if (circlemarkr.isImportant(oid) && circlemarkr.show['important'] == "true") {
+            if (circlemarkr.isImportant(oid) && circlemarkr.show['important'] == true) {
                 circlemarkr.addMark(link[j], oid, 'important');
             }
 
-            if (circlemarkr.isFavorite(oid) && circlemarkr.show['fav'] == "true") {
+            if (circlemarkr.isFavorite(oid) && circlemarkr.show['fav'] == true) {
                 circlemarkr.addMark(link[j], oid, 'fav');
             }
 
-            if (circlemarkr.isNewer(oid) && circlemarkr.show['newer'] == "true") {
+            if (circlemarkr.isNewer(oid) && circlemarkr.show['newer'] == true) {
                 circlemarkr.addMark(link[j], oid, 'newer');
             }
         }
