@@ -8,7 +8,7 @@ var Circlemarkr = (function() {
                 cm.setData(request.data);
                 sendResponse({status: 'OK'});
                 return true;
-        });
+        })
 
         this.myMark = 'myMark';
         this.myPointer = 'myPointer';
@@ -220,11 +220,12 @@ var Circlemarkr = (function() {
     };
 
     Circlemarkr.prototype.createFavList = function() {
+
         this.favs = show['fav_list'].split("\n");
     };
 
     Circlemarkr.prototype.setData = function(data) {
-        var json = JSON.parse(data);
+        var json = ((typeof data) == 'string')? JSON.parse(data): data;
         this.userId = json.userId;
         this.createCircleList(json.circles);
         this.createImportantList(json.circles);
@@ -310,7 +311,7 @@ function run(circlemarkr, target) {
         try {
             var link = target.querySelectorAll(selector);
         } catch(e) {
-            console.log(target);
+            //console.log(target);
         }
 
         if (link == undefined) continue;
