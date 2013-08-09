@@ -53,7 +53,7 @@ Background.prototype = {
             if (push) {
                 //self.sendCircleData(tabId, circle);
                 self.sendCircleData(tabId, localStorage[userId]);
-                var alarmNo = 'push_' + tabId + '_ ' + userId;;
+                var alarmNo = 'push_' + tabId + '_' + userId;;
                 chrome.alarms.create(alarmNo, {
                     "periodInMinutes": self.push_interval
                 });
