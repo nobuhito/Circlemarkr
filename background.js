@@ -2,8 +2,8 @@
 // http://www.eisbahn.jp/yoichiro/2013/02/chrome-extension-event-page.html
 
 var Background = function() {
-    this.push_interval = 30;
-    this.get_interval = 60;
+    this.push_interval = 5;
+    this.get_interval = 10;
 };
 Background.prototype = {
     getValues: function(list) {
@@ -46,7 +46,9 @@ Background.prototype = {
                 'circles'  : circles_json,
                 'userId'   : userId,
             };
+            log('get circle data: ' + userId);
             localStorage[userId] = JSON.stringify(circle);
+            localStorage["lastStore"] = Date();
 
             if (push) {
                 //self.sendCircleData(tabId, circle);
@@ -75,9 +77,23 @@ Background.prototype = {
         return defer.promise();
     },
     sendCircleData: function(tabId, circle) {
+        log('push circle data:' + tabId);
         chrome.tabs.sendMessage(parseInt(tabId), {data: circle});
     },
+
 };
+
+var log = function(message) {
+    var f = function(val) {
+        return ('00' + val).substr(-2, 2);
+    }
+    var dt = new Date();
+    var h = f(dt.getHours());
+    var m = f(dt.getMinutes());
+    var s = f(dt.getSeconds());
+    var now = [h, m, s].join(':');
+    console.log('[' + now + '] ' + message);
+}
 
 var bg = new Background();
 
@@ -88,9 +104,14 @@ chrome.runtime.onMessage.addListener( function( message, sender, sendResponse) {
 });
 
 chrome.webNavigation.onCompleted.addListener(function(nav) {
-    if (nav.url.match(/^https\:\/\/.*?\.google\.com\//)) {
-        var re = new RegExp(/^https?\:\/\/.*?\.google\.com\/u\/([0-9]+?)\//);
+    if (nav.url.match(/^https\:\/\/(plus|mail)\.google\.com\/(?:[^_])/) &&
+        !nav.url.match(/hangouts/)) {
+        log('Navigation on complated:' + nav.url)
+
+        var re = new RegExp(/^https?\:\/\/.*?\.google\.com(?:\/mail)?\/u\/([0-9]+?)\//);
         var account = nav.url.match(re)? RegExp.$1: 0;
+        log('Google acount: ' + account);
+
         var interval = {
             "periodInMinutes": bg.push_interval,
         };
@@ -101,24 +122,26 @@ chrome.webNavigation.onCompleted.addListener(function(nav) {
         }).done(function(data) {
             var userId = data.match(/data\:\s\[\"(\d+)\"/)? RegExp.$1: 0;
 
-            var alarmNo = 'get_' + account + '_ ' + userId + '_' + tabId;
+            var alarmNo = 'get_' + account + '_' + userId + '_' + tabId;
             chrome.alarms.create(alarmNo, interval);
 
             var circle = localStorage[userId];
             if (circle == undefined) {
                 bg.storeCircleData(account, userId, tabId, true);
             } else if (circle == 'loading') {
+                log('waiting fetch data: ' + userId);
                 var timer = setInterval(function() {
                     if (localStorage[userId] != 'loading') {
                         clearInterval(timer);
                         bg.sendCircleData(tabId, localStorage[userId]);
-                        var alarmNo = 'push_' + tabId + '_ ' + userId;;
+                        var alarmNo = 'push_' + tabId + '_' + userId;;
                         chrome.alarms.create(alarmNo, interval);
                     }
                 }, 500);
             } else {
+                log('found userId: ' + userId);
                 bg.sendCircleData(tabId, localStorage[userId]);
-                var alarmNo = 'push_' + tabId + '_ ' + userId;;
+                var alarmNo = 'push_' + tabId + '_' + userId;;
                 chrome.alarms.create(alarmNo, interval);
             }
             circle = undefined;
