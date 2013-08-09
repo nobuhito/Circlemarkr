@@ -226,13 +226,15 @@ var Circlemarkr = (function() {
 
     Circlemarkr.prototype.setData = function(data) {
         var json = ((typeof data) == 'string')? JSON.parse(data): data;
-        this.userId = json.userId;
-        this.createCircleList(json.circles);
-        this.createImportantList(json.circles);
-        this.createNewFollowList(json.followers);
-        this.createUserList('circles', json.circles);
-        this.createUserList('followers', json.followers);
-        this.createFavList();
+        if (json != undefined) {
+            this.userId = json.userId;
+            this.createCircleList(json.circles);
+            this.createImportantList(json.circles);
+            this.createNewFollowList(json.followers);
+            this.createUserList('circles', json.circles);
+            this.createUserList('followers', json.followers);
+            this.createFavList();
+        }
     };
 
     return Circlemarkr;
