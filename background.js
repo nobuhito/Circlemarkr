@@ -4,6 +4,7 @@
 var Background = function() {
     this.push_interval = 5;
     this.get_interval = 10;
+    this.is_first = false;
 };
 Background.prototype = {
     getValues: function(list) {
@@ -41,18 +42,15 @@ Background.prototype = {
         ).then(function(followers, circles, userId) {
             var followers_json = eval('//' + followers[0]);
             var circles_json = eval('//' + circles[0]);
-            var circle = {
-                'followers': followers_json,
-                'circles'  : circles_json,
-                'userId'   : userId,
-            };
             log('get circle data: ' + userId);
-            localStorage[userId] = JSON.stringify(circle);
-            localStorage["lastStore"] = Date();
+
+            localStorage[userId + '_f'] = JSON.stringify(followers_json);
+            localStorage[userId + '_c']   = JSON.stringify(circles_json);
+            localStorage[userId] = Date();
+
 
             if (push) {
-                //self.sendCircleData(tabId, circle);
-                self.sendCircleData(tabId, localStorage[userId]);
+                self.sendCircleData(tabId, self.getCircleData(userId));
                 var alarmNo = 'push_' + tabId + '_' + userId;;
                 chrome.alarms.create(alarmNo, {
                     "periodInMinutes": self.push_interval
@@ -75,6 +73,14 @@ Background.prototype = {
             success: defer.resolve,
         });
         return defer.promise();
+    },
+    getCircleData: function(userId) {
+        var json = {
+            followers: JSON.parse(localStorage[userId + '_f']),
+            circles: JSON.parse(localStorage[userId + '_c']),
+            userId: userId,
+        };
+        return json;
     },
     sendCircleData: function(tabId, circle) {
         log('push circle data:' + tabId);
@@ -126,21 +132,22 @@ chrome.webNavigation.onCompleted.addListener(function(nav) {
             chrome.alarms.create(alarmNo, interval);
 
             var circle = localStorage[userId];
-            if (circle == undefined) {
+            if (circle == undefined || bg.is_first == true) {
                 bg.storeCircleData(account, userId, tabId, true);
+                bg.is_first = false;
             } else if (circle == 'loading') {
                 log('waiting fetch data: ' + userId);
                 var timer = setInterval(function() {
                     if (localStorage[userId] != 'loading') {
                         clearInterval(timer);
-                        bg.sendCircleData(tabId, localStorage[userId]);
+                        bg.sendCircleData(tabId, bg.getCircleData(userId));
                         var alarmNo = 'push_' + tabId + '_' + userId;;
                         chrome.alarms.create(alarmNo, interval);
                     }
                 }, 500);
             } else {
                 log('found userId: ' + userId);
-                bg.sendCircleData(tabId, localStorage[userId]);
+                bg.sendCircleData(tabId, bg.getCircleData(userId));
                 var alarmNo = 'push_' + tabId + '_' + userId;;
                 chrome.alarms.create(alarmNo, interval);
             }
@@ -155,6 +162,14 @@ chrome.alarms.onAlarm.addListener(function(alarm) {
     if (args[0] == 'get') {
         bg.storeCircleData(args[1], args[2], args[3]);
     } else if (args[0] == 'push') {
-        bg.sendCircleData(args[1], localStorage[args[2]]);
+        bg.sendCircleData(args[1], bg.getCircleData(args[2]));
     }
+});
+
+chrome.runtime.onInstalled.addListener(function() {
+    bg.is_first = true;
+});
+
+chrome.runtime.onUpdateAvailable.addListener(function() {
+    bg.is_first = true;
 });
