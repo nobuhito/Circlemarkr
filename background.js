@@ -153,9 +153,14 @@ chrome.webNavigation.onCompleted.addListener(function(nav) {
         var account = nav.url.match(re)? RegExp.$1: 0;
         log('Google acount: ' + account);
 
-        var interval = {
+        var push_interval = {
             "periodInMinutes": bg.push_interval,
         };
+
+        var get_interval = {
+            "periodInMinutes": bg.get_interval,
+        };
+
         var tabId = nav.tabId;
 
         $.ajax({
@@ -163,13 +168,14 @@ chrome.webNavigation.onCompleted.addListener(function(nav) {
         }).done(function(data) {
             var userId = data.match(/data\:\s\[\"(\d+)\"/)? RegExp.$1: 0;
 
-            var alarmNo = 'get_' + account + '_' + userId + '_' + tabId;
-            chrome.alarms.create(alarmNo, interval);
-
             var circle = localStorage[userId];
             if (circle == undefined || bg.is_first == true) {
+
                 bg.storeCircleData(account, userId, tabId, true);
                 bg.is_first = false;
+
+                var alarmNo = 'get_' + account + '_' + userId;
+                chrome.alarms.create(alarmNo, get_interval);
             } else if (circle == 'loading') {
                 log('waiting fetch data: ' + userId);
                 var timer = setInterval(function() {
@@ -177,14 +183,14 @@ chrome.webNavigation.onCompleted.addListener(function(nav) {
                         clearInterval(timer);
                         bg.sendCircleData(tabId, bg.getCircleData(userId));
                         var alarmNo = 'push_' + tabId + '_' + userId;;
-                        chrome.alarms.create(alarmNo, interval);
+                        chrome.alarms.create(alarmNo, push_interval);
                     }
                 }, 500);
             } else {
                 log('found userId: ' + userId);
                 bg.sendCircleData(tabId, bg.getCircleData(userId));
                 var alarmNo = 'push_' + tabId + '_' + userId;;
-                chrome.alarms.create(alarmNo, interval);
+                chrome.alarms.create(alarmNo, push_interval);
             }
             circle = undefined;
         });
@@ -195,7 +201,7 @@ chrome.alarms.clearAll();
 chrome.alarms.onAlarm.addListener(function(alarm) {
     var args = alarm.name.split('_');
     if (args[0] == 'get') {
-        bg.storeCircleData(args[1], args[2], args[3]);
+        bg.storeCircleData(args[1], args[2]);
     } else if (args[0] == 'push') {
         bg.sendCircleData(args[1], bg.getCircleData(args[2]));
     }
