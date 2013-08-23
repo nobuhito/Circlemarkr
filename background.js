@@ -5,6 +5,7 @@ var Background = function() {
     this.push_interval = 5;
     this.get_interval = 10;
     this.is_first = false;
+    this.localStorage_length = 2400000;
 };
 Background.prototype = {
     getValues: function(list) {
@@ -44,10 +45,29 @@ Background.prototype = {
             var circles_json = eval('//' + circles[0]);
             log('get circle data: ' + userId);
 
-            localStorage[userId + '_f'] = JSON.stringify(followers_json);
-            localStorage[userId + '_c']   = JSON.stringify(circles_json);
-            localStorage[userId] = Date();
+            var str = {};
+            str.f = JSON.stringify(followers_json);
+            str.c = JSON.stringify(circles_json);
 
+
+            var kinds = ["f", "c"];
+            var ll = self.localStorage_length;
+            for (var j in kinds) {
+                var kind = kinds[j];
+                var loop_count = Math.ceil(str[kind].length / ll);
+                for (var i = 0; i < loop_count; i++) {
+                    var s = str[kind].substr(i * ll, ll);
+                    localStorage.removeItem(userId + '_' + kind + '_' + i);
+                    localStorage[userId + '_' + kind + '_' + i] = s;
+                    localStorage.removeItem(userId + '_' + kind + '_count');
+                    localStorage[userId + '_' + kind + '_count'] = i + 1;
+                }
+            }
+
+            localStorage.removeItem("localstrage_length");
+            localStorage["localstrage_length"] = self.localStorage_length;
+            localStorage.removeItem(userId);
+            localStorage[userId] = Date();
 
             if (push) {
                 self.sendCircleData(tabId, self.getCircleData(userId));
@@ -75,9 +95,24 @@ Background.prototype = {
         return defer.promise();
     },
     getCircleData: function(userId) {
+
+        var str = {
+            f: new Array,
+            c: new Array,
+        };
+
+        var kinds = ["f", "c"];
+        for (var j in kinds) {
+            var kind = kinds[j];
+            var loop_count = localStorage[userId + '_' + kind + '_count'];
+            for (var i = 0; i < loop_count; i++) {
+                str[kind].push(localStorage[userId + '_' + kind + '_' + i]);
+            }
+        }
+
         var json = {
-            followers: JSON.parse(localStorage[userId + '_f']),
-            circles: JSON.parse(localStorage[userId + '_c']),
+            followers: JSON.parse(str['f'].join('')),
+            circles: JSON.parse(str['c'].join('')),
             userId: userId,
         };
         return json;
